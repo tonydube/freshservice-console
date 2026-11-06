@@ -1,0 +1,21 @@
+@import 'tailwindcss';
+
+@layer base {
+  html { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+  body { @apply bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased; }
+}
+
+/* Freshservice HTML bodies (Tailwind preflight strips defaults). */
+.fs-html { overflow-wrap: anywhere; line-height: 1.55; }
+.fs-html p, .fs-html div + div { margin: 0.25rem 0; }
+.fs-html a { color: var(--color-sky-700); text-decoration: underline; }
+.fs-html ul { list-style: disc; padding-left: 1.25rem; }
+.fs-html ol { list-style: decimal; padding-left: 1.25rem; }
+.fs-html blockquote { border-left: 3px solid var(--color-zinc-300); padding-left: 0.75rem; color: var(--color-zinc-500); }
+.fs-html img { max-width: 100%; height: auto; }
+.fs-html table { border-collapse: collapse; }
+.fs-html td, .fs-html th { border: 1px solid var(--color-zinc-300); padding: 0.25rem 0.5rem; }
+.fs-html pre, .fs-html code { font-family: ui-monospace, monospace; font-size: 0.85em; }
+@media (prefers-color-scheme: dark) {
+  .fs-html a { color: var(--color-sky-400); }
+}

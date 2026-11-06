@@ -1,0 +1,42 @@
+{
+  "name": "freshservice-console",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c blue,green \"tsx watch server/index.ts\" \"vite\"",
+    "dev:mock": "concurrently -k -n mock,server,web -c magenta,blue,green \"tsx watch server/mock/index.ts\" \"FRESHSERVICE_BASE_URL=http://127.0.0.1:8788 FRESHSERVICE_API_KEY=mock-key MY_AGENT_EMAIL=tony@example.com tsx watch server/index.ts\" \"vite\"",
+    "build": "tsc -b && vite build",
+    "start": "npm run build && NODE_ENV=production tsx server/index.ts",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.6",
+    "@tanstack/react-query": "^5.106.1",
+    "dompurify": "^3.4.17",
+    "dotenv": "^18.0.9",
+    "hono": "^4.13.16",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router": "^7.18.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "concurrently": "^9.2.5",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^4.1.12"
+  }
+}
