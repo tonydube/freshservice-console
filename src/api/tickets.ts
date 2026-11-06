@@ -1,5 +1,5 @@
 import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query';
-import { ApiError, fsGet, fsGetAll } from './client';
+import { fsGet, fsGetAll } from './client';
 import {
   ActivitiesResponse, ConversationsResponse, FilterResponse, RequesterResponse, TicketResponse, TicketsResponse,
   type Ticket,
@@ -76,12 +76,12 @@ export function usePeopleNames(ids: Array<number | null | undefined>): Map<numbe
   const agents = useAgents();
   const agentMap = new Map((agents.data ?? []).map((a) => [a.id, agentName(a)]));
   const unique = [...new Set(ids.filter((x): x is number => typeof x === 'number'))];
+  // Only look up requesters once agents have loaded; if agents failed, don't fan out more calls.
   const toFetch = agents.isSuccess ? unique.filter((i) => !agentMap.has(i)) : [];
   const results = useQueries({
     queries: toFetch.map((rid) => ({
       queryKey: ['requester', rid],
       staleTime: 60 * 60_000,
-      retry: (n: number, e: unknown) => !(e instanceof ApiError && e.status === 404) && n < 1,
       queryFn: async () => (await fsGet(`requesters/${rid}`, RequesterResponse)).data.requester,
     })),
   });
@@ -99,5 +99,7 @@ export function useMyAgent() {
   const agents = useAgents(health.data?.configured === true);
   const email = (myAgentEmail || health.data?.myAgentEmail || '').toLowerCase();
   const agent = email ? agents.data?.find((a) => a.email?.toLowerCase() === email) ?? null : null;
-  return { email, agent, loading: agents.isPending };
+  // isFetched stays true once the first attempt settles (success or error), so a later refetch
+  // can't flip the UI back to "loading" and unmount the table.
+  return { email, agent, loading: !agents.isFetched, failed: agents.isError };
 }

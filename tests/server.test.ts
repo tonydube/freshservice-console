@@ -111,3 +111,15 @@ describe('mock filter endpoint (via proxy)', () => {
     expect((await app.request('/api/fs/tickets/3/activities')).status).toBe(200);
   });
 });
+
+describe('Link rewriting', () => {
+  it('rewrites absolute Freshservice next links to the proxy', async () => {
+    const config = loadConfig({ FRESHSERVICE_DOMAIN: 'acme', FRESHSERVICE_API_KEY: 'k' });
+    const fetchImpl = (async () => new Response('{"agents":[]}', {
+      status: 200,
+      headers: { link: '<https://acme.freshservice.com/api/v2/agents?per_page=100&page=2>; rel="next"' },
+    })) as unknown as typeof fetch;
+    const res = await createApp(config, fetchImpl).request('/api/fs/agents?per_page=100');
+    expect(res.headers.get('link')).toBe('</api/fs/agents?per_page=100&page=2>; rel="next"');
+  });
+});

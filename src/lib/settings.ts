@@ -6,13 +6,17 @@ export interface UiSettings {
   refreshSeconds: number; // 0 = off
 }
 
-const KEY = 'fs-console:settings';
-const DEFAULTS: UiSettings = { myAgentEmail: '', refreshSeconds: 60 };
+const KEY = 'fs-console:settings:v2';
+const OLD_KEY = 'fs-console:settings';
+const DEFAULTS: UiSettings = { myAgentEmail: '', refreshSeconds: 0 };
 
 function read(): UiSettings {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
+    if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
+    // Carry over the agent email from v1 settings, but not its auto-refresh (now off by default).
+    const old = localStorage.getItem(OLD_KEY);
+    return old ? { ...DEFAULTS, myAgentEmail: String(JSON.parse(old).myAgentEmail ?? '') } : DEFAULTS;
   } catch {
     return DEFAULTS;
   }

@@ -3,7 +3,7 @@ import { activitiesFor, agents, conversationsFor, departments, groups, requester
 import { compileFilter, FilterSyntaxError } from './filter';
 
 /** A small stand-in for Freshservice API v2, for local development and tests. */
-export function createMockApp(opts: { apiKey?: string; rateLimitTotal?: number } = {}) {
+export function createMockApp(opts: { apiKey?: string; rateLimitTotal?: number; fail?: string[] } = {}) {
   const apiKey = opts.apiKey ?? 'mock-key';
   const total = opts.rateLimitTotal ?? 400;
   let windowStart = Date.now();
@@ -27,6 +27,10 @@ export function createMockApp(opts: { apiKey?: string; rateLimitTotal?: number }
     const expected = 'Basic ' + Buffer.from(`${apiKey}:X`).toString('base64');
     if (c.req.header('authorization') !== expected) {
       return c.json({ code: 'invalid_credentials', message: 'You have to be logged in to perform this action.' }, 401);
+    }
+    const resource = c.req.path.replace(/^\/api\/v2\//, '').split('/')[0];
+    if (opts.fail?.includes(resource)) {
+      return c.json({ code: 'access_denied', message: 'You are not authorized to perform this action.' }, 403);
     }
     await next();
   });

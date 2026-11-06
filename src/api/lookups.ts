@@ -6,7 +6,8 @@ import {
 } from './schemas';
 import { buildLabelMaps } from '../lib/enums';
 
-const LOOKUP_STALE = 10 * 60_000;
+/** Reference data rarely changes: fetch once per session (Settings → Re-check reloads it). */
+const LOOKUP_STALE = Infinity;
 
 export const queryKeys = {
   health: ['health'] as const,
@@ -20,8 +21,8 @@ export const queryKeys = {
 export function useHealth() {
   return useQuery({
     queryKey: queryKeys.health,
+    staleTime: Infinity,
     queryFn: async () => HealthSchema.parse(await (await fetch('/api/health')).json()),
-    retry: 1,
   });
 }
 
@@ -30,6 +31,7 @@ export function useConnectionCheck(enabled: boolean) {
   return useQuery({
     queryKey: queryKeys.connection,
     enabled,
+    staleTime: Infinity,
     queryFn: async () => {
       const started = performance.now();
       const { data } = await fsGet('tickets?per_page=1', TicketsResponse);

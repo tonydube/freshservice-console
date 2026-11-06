@@ -1,0 +1,8 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "mock", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev:mock"], "port": 5173 },
+    { "name": "mock-failing-lookups", "runtimeExecutable": "bash", "runtimeArgs": ["-c", "MOCK_FAIL=agents,groups npm run dev:mock"], "port": 5173 },
+    { "name": "dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 5173 }
+  ]
+}

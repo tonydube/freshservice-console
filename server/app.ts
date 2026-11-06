@@ -28,6 +28,7 @@ export function createApp(config: ServerConfig, fetchImpl: typeof fetch = fetch)
     const path = url.pathname.slice('/api/fs/'.length);
     const method = c.req.method.toUpperCase();
     if (!isAllowed(method, path)) {
+      console.warn(`[proxy] blocked ${method} /${path}`);
       return c.json({ error: 'forbidden_endpoint', method, path }, 403);
     }
 
@@ -40,6 +41,7 @@ export function createApp(config: ServerConfig, fetchImpl: typeof fetch = fetch)
     try {
       upstream = await fetchImpl(`${config.apiBase}/${path}${url.search}`, { method, headers, body });
     } catch (err) {
+      console.warn(`[freshservice] ${method} /${path} -> unreachable: ${(err as Error).message}`);
       return c.json({ error: 'upstream_unreachable', message: (err as Error).message }, 502);
     }
 
@@ -47,9 +49,16 @@ export function createApp(config: ServerConfig, fetchImpl: typeof fetch = fetch)
     upstream.headers.forEach((value, key) => {
       if (PASS_HEADERS.some((re) => re.test(key))) out.set(key, value);
     });
-    // Rewrite Link header to point at the proxy instead of Freshservice.
+    // Rewrite Link header to point at the proxy instead of Freshservice (any host/scheme form).
     const link = out.get('link');
-    if (link) out.set('link', link.split(config.apiBase).join('/api/fs'));
+    if (link) out.set('link', link.replace(/<[^>]*?\/api\/v2\//g, '</api/fs/'));
+
+    if (!upstream.ok) {
+      // Log failures (never the key) so the terminal shows *why* a call failed.
+      const text = await upstream.text();
+      console.warn(`[freshservice] ${method} /${path}${url.search} -> ${upstream.status} ${text.slice(0, 300).replace(/\s+/g, ' ')}`);
+      return new Response(text, { status: upstream.status, headers: out });
+    }
 
     return new Response(upstream.body, { status: upstream.status, headers: out });
   });

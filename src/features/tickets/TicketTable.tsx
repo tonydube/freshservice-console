@@ -76,13 +76,13 @@ export function TicketTable({ tickets, labels, search }: { tickets: Ticket[]; la
                     {t.tags?.map((tag) => <Tag key={tag}>{tag}</Tag>)}
                   </span>
                 </td>
-                <td className="hidden px-3 py-2 whitespace-nowrap text-zinc-600 md:table-cell dark:text-zinc-400">{t.requester_id ? names.get(t.requester_id) ?? '…' : '—'}</td>
+                <td className="hidden px-3 py-2 whitespace-nowrap text-zinc-600 md:table-cell dark:text-zinc-400">{t.requester_id ? names.get(t.requester_id) ?? `#${t.requester_id}` : '—'}</td>
                 <td className="px-3 py-2"><StatusPill value={t.status} labels={labels} /></td>
                 <td className="px-3 py-2"><PriorityText value={t.priority} labels={labels} /></td>
                 <td className="hidden px-3 py-2 whitespace-nowrap text-zinc-600 lg:table-cell dark:text-zinc-400">
-                  {t.responder_id ? names.get(t.responder_id) ?? '…' : <span className="text-zinc-400">Unassigned</span>}
+                  {t.responder_id ? names.get(t.responder_id) ?? `#${t.responder_id}` : <span className="text-zinc-400">Unassigned</span>}
                 </td>
-                <td className="hidden px-3 py-2 whitespace-nowrap text-zinc-600 xl:table-cell dark:text-zinc-400">{t.group_id ? groupNames.get(t.group_id) ?? '…' : '—'}</td>
+                <td className="hidden px-3 py-2 whitespace-nowrap text-zinc-600 xl:table-cell dark:text-zinc-400">{t.group_id ? groupNames.get(t.group_id) ?? `#${t.group_id}` : '—'}</td>
                 <td className={`hidden px-3 py-2 whitespace-nowrap md:table-cell ${overdue ? 'text-red-600' : 'text-zinc-600 dark:text-zinc-400'}`} title={dateTime(t.due_by)}>
                   {relativeTime(t.due_by)}
                 </td>

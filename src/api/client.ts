@@ -25,7 +25,9 @@ export function parseNextLink(link: string | null): string | null {
   const m = link.match(/<([^>]+)>\s*;\s*rel="next"/);
   if (!m) return null;
   const url = new URL(m[1], 'http://local');
-  return url.pathname.replace(/^\/api\/fs\//, '') + url.search;
+  // Normally the proxy rewrites to /api/fs/…, but accept a raw Freshservice /api/v2/… URL too,
+  // otherwise page 2 would be requested as "api/v2/agents" and blocked by the allowlist.
+  return url.pathname.replace(/^\/api\/(fs|v2)\//, '') + url.search;
 }
 
 /**
@@ -95,19 +97,4 @@ function messageForStatus(status: number): string {
     case 503: return 'The server is not configured. Check your .env file.';
     default: return `Request failed (HTTP ${status}).`;
   }
-}
-
-/** TanStack Query retry policy: retry 429 and network/5xx, never 4xx client errors. */
-export function shouldRetry(failureCount: number, error: unknown): boolean {
-  if (error instanceof ApiError) {
-    if (error.status === 429) return failureCount < 3;
-    if (error.status >= 400 && error.status < 500) return false;
-    if (error.status === 503) return false;
-  }
-  return failureCount < 2;
-}
-
-export function retryDelay(attempt: number, error: unknown): number {
-  if (error instanceof ApiError && error.status === 429) return (error.retryAfter ?? 30) * 1000;
-  return Math.min(1000 * 2 ** attempt, 10_000);
 }
