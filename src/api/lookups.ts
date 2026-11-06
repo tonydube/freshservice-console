@@ -40,37 +40,50 @@ export function useConnectionCheck(enabled: boolean) {
   });
 }
 
+/**
+ * All reference-data queries wait for the same signal (server configured). If observers of one
+ * query switched on at different times, a failed query would be re-attempted when the later one
+ * switched on.
+ */
+function useLookupsReady() {
+  return useHealth().data?.configured === true;
+}
+
 export function useAgents(enabled = true) {
+  const ready = useLookupsReady();
   return useQuery({
     queryKey: queryKeys.agents,
-    enabled,
+    enabled: enabled && ready,
     staleTime: LOOKUP_STALE,
     queryFn: () => fsGetAll('agents?per_page=100', AgentsResponse, (d) => d.agents),
   });
 }
 
 export function useGroups(enabled = true) {
+  const ready = useLookupsReady();
   return useQuery({
     queryKey: queryKeys.groups,
-    enabled,
+    enabled: enabled && ready,
     staleTime: LOOKUP_STALE,
     queryFn: () => fsGetAll('groups?per_page=100', GroupsResponse, (d) => d.groups),
   });
 }
 
 export function useDepartments(enabled = true) {
+  const ready = useLookupsReady();
   return useQuery({
     queryKey: queryKeys.departments,
-    enabled,
+    enabled: enabled && ready,
     staleTime: LOOKUP_STALE,
     queryFn: () => fsGetAll('departments?per_page=100', DepartmentsResponse, (d) => d.departments),
   });
 }
 
 export function useTicketFields(enabled = true) {
+  const ready = useLookupsReady();
   return useQuery({
     queryKey: queryKeys.ticketFields,
-    enabled,
+    enabled: enabled && ready,
     staleTime: LOOKUP_STALE,
     queryFn: async () => (await fsGet('ticket_form_fields', TicketFieldsResponse)).data.ticket_fields,
   });

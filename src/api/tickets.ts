@@ -96,7 +96,7 @@ export function usePeopleNames(ids: Array<number | null | undefined>): Map<numbe
 export function useMyAgent() {
   const { myAgentEmail } = useSettings();
   const health = useHealth();
-  const agents = useAgents(health.data?.configured === true);
+  const agents = useAgents();
   const email = (myAgentEmail || health.data?.myAgentEmail || '').toLowerCase();
   const agent = email ? agents.data?.find((a) => a.email?.toLowerCase() === email) ?? null : null;
   // isFetched stays true once the first attempt settles (success or error), so a later refetch
